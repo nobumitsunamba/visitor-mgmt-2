@@ -6,6 +6,8 @@ import Link from 'next/link'
 interface SearchParams {
   status?: string
   date?: string
+  company?: string
+  staff?: string
 }
 
 export default async function VisitsPage({
@@ -24,9 +26,17 @@ export default async function VisitsPage({
   if (params.date) {
     query = query.eq('scheduled_date', params.date)
   }
+  if (params.company) {
+    query = query.ilike('company_name', `%${params.company}%`)
+  }
+  if (params.staff) {
+    query = query.ilike('staff_name', `%${params.staff}%`)
+  }
 
   const { data } = await query
   const visits = (data ?? []) as Visit[]
+
+  const hasFilter = params.status || params.date || params.company || params.staff
 
   return (
     <div className="space-y-4">
@@ -41,7 +51,27 @@ export default async function VisitsPage({
       </div>
 
       {/* フィルター */}
-      <form className="flex flex-wrap gap-3">
+      <form className="flex flex-wrap gap-3 items-center">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">会社名</label>
+          <input
+            type="text"
+            name="company"
+            defaultValue={params.company ?? ''}
+            placeholder="部分一致"
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#007B8A] w-32"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">担当者名</label>
+          <input
+            type="text"
+            name="staff"
+            defaultValue={params.staff ?? ''}
+            placeholder="部分一致"
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#007B8A] w-32"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <label className="text-sm text-gray-600">ステータス</label>
           <select
@@ -71,7 +101,7 @@ export default async function VisitsPage({
         >
           絞り込み
         </button>
-        {(params.status || params.date) && (
+        {hasFilter && (
           <Link
             href="/visits"
             className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
