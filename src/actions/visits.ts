@@ -17,7 +17,7 @@ export async function createVisit(values: VisitFormValues) {
     status: 'scheduled',
   })
 
-  if (error) return { error: '登録に失敗しました。' }
+  if (error) return { error: `登録に失敗しました。(${error.message})` }
 
   revalidatePath('/visits')
   revalidatePath('/dashboard')
